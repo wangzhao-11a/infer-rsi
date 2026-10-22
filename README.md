@@ -161,6 +161,11 @@ Pure standard library at runtime. Python 3.10+.
 
 ---
 
+## Related
+
+- [kernel-agent](https://github.com/wangzhao-11a/kernel-agent) — operator-level optimization loop with scoped strategy memory.
+- [agent-harness](https://github.com/wangzhao-11a/agent-harness) — zero-dependency harness runtime for LLM agents.
+
 ## License
 
 Apache-2.0 — see `LICENSE`.
