@@ -1,0 +1,57 @@
+{
+  "id": "demo-blocked",
+  "description": "合成演示：请求 kv-offload 特性，知识卡在 doctor 阶段直接阻断（不需要 NPU）",
+  "repo": "..",
+  "workdir": "..",
+  "backend": "demo",
+  "hardware": {
+    "device_model": "demo-accelerator",
+    "device_ids": [
+      0
+    ]
+  },
+  "stack": {
+    "vllm": "0.10.0"
+  },
+  "model": "demo-model",
+  "topology": "single",
+  "workload": {
+    "input_len": 4096,
+    "output_len": 256,
+    "concurrency": 32,
+    "dataset": "random",
+    "seed": 7
+  },
+  "current_config": {
+    "max_num_seqs": 64
+  },
+  "primary_metric": {
+    "key": "output_throughput",
+    "unit": "tok/s",
+    "direction": "maximize"
+  },
+  "constraints": [
+    {
+      "key": "tpot_p95_ms",
+      "op": "<=",
+      "value": 50
+    }
+  ],
+  "baseline_command": "python demo/fake_server.py --mode baseline --result {result}",
+  "candidate_command": "python demo/fake_server.py --mode candidate --result {result} --base-gain-pct 5",
+  "quality_command": "python demo/fake_quality.py --baseline {baseline} --candidate {candidate}",
+  "repetitions": 3,
+  "min_improvement_pct": 3.0,
+  "noise_cv_pct": 8.0,
+  "max_minutes": 5,
+  "metadata": {
+    "dtype": "bf16",
+    "tags": [
+      "demo",
+      "feasibility"
+    ],
+    "requested_features": [
+      "kv-offload"
+    ]
+  }
+}

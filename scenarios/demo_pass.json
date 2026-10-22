@@ -1,0 +1,66 @@
+{
+  "id": "demo-pass",
+  "description": "合成演示：候选吞吐 +8%，质量与约束全部通过（不需要 NPU）",
+  "repo": "..",
+  "workdir": "..",
+  "backend": "demo",
+  "hardware": {
+    "device_model": "demo-accelerator",
+    "device_ids": [
+      0
+    ]
+  },
+  "stack": {
+    "vllm": "0.10.0"
+  },
+  "model": "demo-model",
+  "topology": "single",
+  "workload": {
+    "input_len": 8192,
+    "output_len": 1000,
+    "concurrency": 256,
+    "dataset": "random",
+    "seed": 42
+  },
+  "current_config": {
+    "max_num_seqs": 72,
+    "max_num_batched_tokens": 192,
+    "graph_mode": "FULL_DECODE_ONLY"
+  },
+  "primary_metric": {
+    "key": "output_throughput",
+    "unit": "tok/s",
+    "direction": "maximize"
+  },
+  "constraints": [
+    {
+      "key": "ttft_p95_ms",
+      "op": "<=",
+      "value": 1200
+    },
+    {
+      "key": "tpot_p95_ms",
+      "op": "<=",
+      "value": 35
+    },
+    {
+      "key": "memory_gb",
+      "op": "<=",
+      "value": 80
+    }
+  ],
+  "baseline_command": "python demo/fake_server.py --mode baseline --result {result} --sleep 0.01",
+  "candidate_command": "python demo/fake_server.py --mode candidate --result {result} --sleep 0.01 --base-gain-pct 8",
+  "quality_command": "python demo/fake_quality.py --baseline {baseline} --candidate {candidate}",
+  "repetitions": 3,
+  "min_improvement_pct": 3.0,
+  "noise_cv_pct": 8.0,
+  "max_minutes": 5,
+  "metadata": {
+    "dtype": "bf16",
+    "tags": [
+      "demo",
+      "decode-throughput"
+    ]
+  }
+}

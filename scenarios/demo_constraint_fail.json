@@ -1,0 +1,52 @@
+{
+  "id": "demo-constraint-fail",
+  "description": "合成演示：吞吐提升但 TPOT 违反 SLO，必须拒绝",
+  "repo": "..",
+  "workdir": "..",
+  "backend": "demo",
+  "hardware": {
+    "device_model": "demo-accelerator",
+    "device_ids": [
+      0
+    ]
+  },
+  "stack": {
+    "vllm": "0.10.0"
+  },
+  "model": "demo-model",
+  "topology": "single",
+  "workload": {
+    "input_len": 8192,
+    "output_len": 1000,
+    "concurrency": 256
+  },
+  "current_config": {
+    "max_num_seqs": 72
+  },
+  "primary_metric": {
+    "key": "output_throughput",
+    "unit": "tok/s",
+    "direction": "maximize"
+  },
+  "constraints": [
+    {
+      "key": "tpot_p95_ms",
+      "op": "<=",
+      "value": 35
+    }
+  ],
+  "baseline_command": "python demo/fake_server.py --mode baseline --result {result}",
+  "candidate_command": "python demo/fake_server.py --mode candidate --result {result} --base-gain-pct 5 --tpot 45",
+  "quality_command": "python demo/fake_quality.py --baseline {baseline} --candidate {candidate}",
+  "repetitions": 3,
+  "min_improvement_pct": 3.0,
+  "noise_cv_pct": 8.0,
+  "max_minutes": 5,
+  "metadata": {
+    "dtype": "bf16",
+    "tags": [
+      "demo",
+      "constraint"
+    ]
+  }
+}

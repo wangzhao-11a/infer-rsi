@@ -1,0 +1,66 @@
+{
+  "id": "demo-knob-sweep",
+  "description": "合成演示：候选本身无收益，只有 max_num_seqs 变化带来吞吐曲线，用于 sweep",
+  "repo": "..",
+  "workdir": "..",
+  "backend": "demo",
+  "hardware": {
+    "device_model": "demo-accelerator",
+    "device_ids": [
+      0
+    ]
+  },
+  "stack": {
+    "vllm": "0.10.0"
+  },
+  "model": "demo-model",
+  "topology": "single",
+  "workload": {
+    "input_len": 8192,
+    "output_len": 1000,
+    "concurrency": 256,
+    "dataset": "random",
+    "seed": 42
+  },
+  "current_config": {
+    "max_num_seqs": 72,
+    "max_num_batched_tokens": 192
+  },
+  "primary_metric": {
+    "key": "output_throughput",
+    "unit": "tok/s",
+    "direction": "maximize"
+  },
+  "constraints": [
+    {
+      "key": "ttft_p95_ms",
+      "op": "<=",
+      "value": 1200
+    },
+    {
+      "key": "tpot_p95_ms",
+      "op": "<=",
+      "value": 35
+    },
+    {
+      "key": "memory_gb",
+      "op": "<=",
+      "value": 80
+    }
+  ],
+  "baseline_command": "python demo/fake_server.py --mode baseline --result {result} --noise-pct 0.5",
+  "candidate_command": "python demo/fake_server.py --mode candidate --result {result} --base-gain-pct 0 --noise-pct 0.5",
+  "quality_command": "python demo/fake_quality.py --baseline {baseline} --candidate {candidate}",
+  "repetitions": 3,
+  "min_improvement_pct": 3.0,
+  "noise_cv_pct": 8.0,
+  "max_minutes": 5,
+  "metadata": {
+    "dtype": "bf16",
+    "tags": [
+      "demo",
+      "sweep",
+      "max-num-seqs"
+    ]
+  }
+}
